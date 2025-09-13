@@ -1,0 +1,41 @@
+{
+    "name": "ci4-cms-erp/ext_module_generator",
+    "description": "A Spark command for CodeIgniter 4 that generates a modular structure for the ci4ms framework, including controllers, views, routes, and language files.",
+    "type": "library",
+    "keywords": [
+        "codeigniter4",
+        "spark",
+        "module",
+        "module-generator",
+        "ci4ms"
+    ],
+    "homepage": "https://github.com/ci4-cms-erp/ext_module_generator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bertuğ Fahri ÖZER",
+            "email": "bertugfahriozer@gmail.com",
+            "homepage": "https://bertugfahriozer.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "codeigniter4/framework": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "ext-module-generator\\": "src/"
+        }
+    },
+    "extra": {
+        "codeigniter": {
+            "namespace": "ext_module_generator",
+            "commands": [
+                "ext_module_generator\\Commands\\ModuleGenerator"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

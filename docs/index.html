@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModuleGenerator Documentation</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #123a49;
+            --primary: #2da592;
+            --primary-light: #8bcbb7;
+            --light-bg: #f5faf6;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--primary-dark);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.7;
+        }
+
+        .navbar {
+            background: var(--gradient);
+            box-shadow: 0 4px 18px rgba(18, 58, 73, 0.15);
+            padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-brand i {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 6px;
+            margin: 0 2px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            background: var(--gradient);
+            color: white;
+            padding: 4rem 0;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-weight: 800;
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(18, 58, 73, 0.1);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            background: white;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(18, 58, 73, 0.15);
+        }
+
+        .card-header {
+            background: var(--gradient);
+            color: white;
+            padding: 1.2rem 1.5rem;
+            font-weight: 600;
+            font-size: 1.3rem;
+            border-bottom: 0;
+        }
+
+        .card-body {
+            padding: 2rem;
+        }
+
+        .section-title {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.95rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--primary);
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            transform: scale(1.05);
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.8rem 0;
+            padding-left: 2.5rem;
+            position: relative;
+            border-bottom: 1px solid rgba(43, 165, 146, 0.1);
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            top: 0.8rem;
+            width: 24px;
+            height: 24px;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .file-structure {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.8;
+        }
+
+        .file-item {
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .file-item:before {
+            content: '📄';
+            position: absolute;
+            left: 0;
+        }
+
+        .folder {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-top: 0.8rem;
+        }
+
+        .folder:before {
+            content: '📁';
+            margin-right: 5px;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: var(--gradient);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 15px rgba(18, 58, 73, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(18, 58, 73, 0.4);
+        }
+
+        footer {
+            background: var(--primary-dark);
+            color: white;
+            padding: 3rem 0;
+            margin-top: 4rem;
+            text-align: center;
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 2.5rem 0;
+                border-radius: 0 0 20px 20px;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .card-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cube"></i> ModuleGenerator
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#overview">Overview</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#usage">Usage</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#structure">Structure</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href#templates">Templates</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#examples">Examples</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <i class="fas fa-bolt me-2"></i> CodeIgniter 4 Module Generator
+            </div>
+            <h1>Streamline Your Module Development</h1>
+            <p>An advanced CLI tool for creating modular CodeIgniter 4 applications with a standardized structure and pre-built templates.</p>
+            <a href="#usage" class="btn btn-light btn-lg px-4 py-2">
+                <i class="fas fa-play-circle me-2"></i> Get Started
+            </a>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Overview Section -->
+        <section id="overview" class="mb-5 animate">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-2"></i> Overview
+                </div>
+                <div class="card-body">
+                    <h3 class="section-title">What is ModuleGenerator?</h3>
+                    <p>The <code>ModuleGenerator</code> is a CodeIgniter 4 CLI command designed to create a modular structure for the ci4ms framework. It generates a complete module directory structure with configuration files, controllers, views, and language files, streamlining the development process.</p>
+                    
+                    <h4 class="mt-4 mb-3">Key Features</h4>
+                    <ul class="feature-list">
+                        <li>Creates a standardized module structure with a single command</li>
+                        <li>Generates configuration, routes, controllers, views, and language files</li>
+                        <li>Supports both English and Turkish language files out of the box</li>
+                        <li>Integrates seamlessly with CodeIgniter's CLI for easy execution</li>
+                        <li>Follows CodeIgniter 4 conventions and best practices</li>
+                        <li>Customizable templates to fit your specific needs</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Usage Section -->
+        <section id="usage" class="mb-5 animate">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-terminal me-2"></i> Usage
+                </div>
+                <div class="card-body">
+                    <h3 class="section-title">How to Use ModuleGenerator</h3>
+                    <p>To create a new module, run the following command in your CodeIgniter 4 project directory:</p>
+                    
+ 
+                    <div class="code-block">
+                        php spark make:module ModuleName
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy me-1"></i> Copy
+                        </button>
+                    </div>
+                    
+                    <p>If no module name is provided, the CLI will prompt for one. The module name will be automatically capitalized (e.g., <code>user</code> becomes <code>User</code>).</p>
+                
+                    <h4>Install via Composer</h4>
+                    <p>Add the package to your CodeIgniter 4 project:</p>
+                    <div class="code-block">
+                        compsoer require ci4-cms-erp/ext_module_generator       
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy me-1"></i> Copy
+                        </button>
+                    </div>
+
+                    <h4 class="mt-4 mb-3">Example</h4>
+                    <div class="code-block">
+                        $ php spark make:module Admin<br>
+                        Module 'Admin' created successfully!<br><br>
+                        $ php spark make:module Blog<br>
+                        Module 'Blog' created successfully!
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy me-1"></i> Copy
+                        </button>
+                    </div>
+                    
+                    <p>This will create modules named <code>Admin</code> and <code>Blog</code> in the <code>modules</code> directory with all necessary files and folders.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Structure Section -->
+        <section id="structure" class="mb-5 animate">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-folder me-2"></i> Module Structure
+                </div>
+                <div class="card-body">
+                    <h3 class="section-title">Generated Directory Structure</h3>
+                    <p>The <code>ModuleGenerator</code> creates the following directory structure for each module:</p>
+                    
+                    <div class="file-structure">
+                        <div class="folder">modules/ModuleName/</div>
+                        <div class="file-item">Config/</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">ModuleNameConfig.php</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">Routes.php</div>
+                        
+                        <div class="file-item">Controllers/</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">ModuleName.php</div>
+                        
+                        <div class="file-item">Database/</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">Migrations/</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">Seeds/</div>
+                
+                        <div class="file-item">Helpers/</div>
+                        
+                        <div class="file-item">Language/</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">en/</div>
+                        <div class="file-item" style="padding-left: 3.5rem;">ModuleName.php</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">tr/</div>
+                        <div class="file-item" style="padding-left: 3.5rem;">ModuleName.php</div>
+                        
+                        <div class="file-item">Libraries/</div>
+                        <div class="file-item">Models/</div>
+                        <div class="file-item">Validation/</div>
+                        
+                        <div class="file-item">Views/</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">create.php</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">list.php</div>
+                        <div class="file-item" style="padding-left: 2.5rem;">update.php</div>
+                    </div>
+                    
+                    <p class="mt-3">Each directory and file serves a specific purpose in the module, following CodeIgniter 4 conventions and best practices.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Templates Section -->
+        <section id="templates" class="mb-5 animate">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-code me-2"></i> Template Files
+                </div>
+                <div class="card-body">
+                    <h3 class="section-title">Generated Template Files</h3>
+                    <p>The generator creates several template files with predefined content to jumpstart your development:</p>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-cog text-primary me-2"></i> Config/ModuleNameConfig.php</h5>
+                                    <p class="mb-0">Defines module-specific configuration, including CSRF exceptions and filters.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-route text-primary me-2"></i> Config/Routes.php</h5>
+                                    <p class="mb-0">Sets up routes for the module, including index, create, and update routes.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-code text-primary me-2"></i> Controllers/ModuleName.php</h5>
+                                    <p class="mb-0">A controller with methods for index, create, and update actions, including basic validation.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5><i class="fas fa-language text-primary me-2"></i> Language Files</h5>
+                                    <p class="mb-0">English and Turkish language files with welcome messages and other translations.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="mt-3">Each file is generated using a template method in the <code>ModuleGenerator</code> class, ensuring consistency across all your modules.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples Section -->
+        <section id="examples" class="mb-5 animate">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list-alt me-2"></i> Examples
+                </div>
+                <div class="card-body">
+                    <h3 class="section-title">Example Output</h3>
+                    <p>Here's an example of the controller template that gets generated:</p>
+                    
+                    <div class="code-block">
+<?php
+namespace Modules\Blog\Controllers;
+
+class Blog extends \Modules\Backend\Controllers\BaseController {
+    public function index() {
+        return view('Modules\Blog\Views\list', $this->defData);
+    }
+    
+    public function create() {
+        if ($this->request->is('post')) {
+            $vdata = [
+                ''=>['label'=>'', 'rules'=>''],
+            ];
+            $valData = ($vdata);
+            if ($this->validate($valData) == false) return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        return view('Modules\Blog\Views\create', $this->defData);
+    }
+    
+    public function update() {
+        if ($this->request->is('post')) {
+            $vdata = [
+                ''=>['label'=>'', 'rules'=>''],
+            ];
+            $valData = ($vdata);
+            if ($this->validate($valData) == false) return redirect()->back()->withInput()->with('errors', $this->validator->getErrors());
+        }
+        return view('Modules\Blog\Views\update', $this->defData);
+    }
+}
+?>
+                        <button class="copy-btn" onclick="copyCode(this)">
+                            <i class="fas fa-copy me-1"></i> Copy
+                        </button>
+                    </div>
+                    
+                    <p class="mt-3">This provides a solid starting point for your module's controller, with basic CRUD operations already set up.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </a>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-md-start">
+                    <h5>ModuleGenerator</h5>
+                    <p>A CodeIgniter 4 module scaffolding tool</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>Made with <i class="fas fa-heart text-danger"></i> for the CodeIgniter community</p>
+                    <p>© 2023 - All rights reserved</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Copy code functionality
+        function copyCode(button) {
+            const codeBlock = button.closest('.code-block');
+            const text = codeBlock.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-check me-1"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        // Back to top button
+        const backToTopButton = document.querySelector('.back-to-top');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.add('visible');
+            } else {
+                backToTopButton.classList.remove('visible');
+            }
+        });
+        
+        backToTopButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Animation on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.animate');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.animation = 'fadeIn 0.6s ease-out forwards';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            animatedElements.forEach(element => {
+                observer.observe(element);
+            });
+        });
+
+        // Navbar background on scroll
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.style.boxShadow = '0 4px 18px rgba(18, 58, 73, 0.2)';
+            } else {
+                navbar.style.boxShadow = '0 4px 18px rgba(18, 58, 73, 0.15)';
+            }
+        });
+    </script>
+</body>
+</html>
