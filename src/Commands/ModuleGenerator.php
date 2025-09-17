@@ -51,7 +51,7 @@ class ModuleGenerator extends BaseCommand
         $this->createFile($modulePath . '/Controllers/' . $moduleName . '.php', $this->getControllerTemplate($moduleName));
         $this->createFile($modulePath . '/Language/en/' . $moduleName . '.php', $this->getLanguageTemplate($moduleName, 'en'));
         $this->createFile($modulePath . '/Language/tr/' . $moduleName . '.php', $this->getLanguageTemplate($moduleName, 'tr'));
-        
+
         $this->createFile($modulePath . '/Views/create.php', $this->getViewTemplate('<a href="'.route_to(lcfirst($moduleName)).'" class="btn btn-outline-info">'.lang('Backend.backToList').'</a>'));
         $this->createFile($modulePath . '/Views/list.php', $this->getViewTemplate('<a href="'.route_to(lcfirst($moduleName).'Create').'" class="btn btn-outline-success">'.lang('Backend.add').'</a>'));
         $this->createFile($modulePath . '/Views/update.php', $this->getViewTemplate('<a href="'.route_to(lcfirst($moduleName)).'" class="btn btn-outline-info">'.lang('Backend.backToList').'</a>'));
@@ -95,7 +95,7 @@ EOD;
     \$routes->match(['GET', 'POST'], '/', '{$moduleName}::index',['as' => '{$l_moduleName}', 'role' => 'read']);
     \$routes->match(['GET', 'POST'], 'create', '{$moduleName}::create', ['as' => '{$l_moduleName}Create', 'role' => 'create']);
     \$routes->match(['GET', 'POST'], 'update/(:num)', '{$moduleName}::update/$1', ['as' => '{$l_moduleName}Update', 'role' => 'update']);
-    \$routes->get('delete', '{$modulesName}::delete(:num)',['as' => '{$l_moduleName}Delete/$1', 'role' => 'delete']);
+    \$routes->get('delete', '{$moduleName}::delete(:num)',['as' => '{$l_moduleName}Delete/$1', 'role' => 'delete']);
 });
 EOD;
     }
@@ -154,7 +154,7 @@ class {$moduleName} extends \Modules\Backend\Controllers\BaseController {
         return view('Modules\\{$moduleName}\\Views\create', \$this->defData);
     }
 
-    public function update(int $id) {
+    public function update(int \$id) {
         if (\$this->request->is('post')) {
             \$vdata = [
                 ''=>['label'=>'', 'rules'=>''],
@@ -165,7 +165,7 @@ class {$moduleName} extends \Modules\Backend\Controllers\BaseController {
         return view('Modules\\{$moduleName}\\Views\update', \$this->defData);
     }
 
-    public function delete(int $id)
+    public function delete(int \$id)
     {
         \$infos=\$this->commonModel->selectOne('your_table',['id'=>\$id]);
         if(\$this->commonModel->remove('your_table',['id'=>\$id]))
