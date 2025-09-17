@@ -25,14 +25,14 @@
     },
     "autoload": {
         "psr-4": {
-            "ext-module-generator\\": "src/"
+            "ext_module_generator\\": "src/"
         }
     },
     "extra": {
         "codeigniter": {
             "namespace": "ci4-cms-erp\\ext_module_generator",
             "commands": [
-                "ext_module_generator\\Commands\\ModuleGenerator"
+                "ci4-cms-erp\\ext_module_generator\\Commands\\ModuleGenerator"
             ]
         }
     },
