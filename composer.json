@@ -30,7 +30,7 @@
     },
     "extra": {
         "codeigniter": {
-            "namespace": "ext_module_generator",
+            "namespace": "ci4-cms-erp\\ext_module_generator",
             "commands": [
                 "ext_module_generator\\Commands\\ModuleGenerator"
             ]
