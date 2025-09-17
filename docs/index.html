@@ -536,7 +536,7 @@ class Blog extends \Modules\Backend\Controllers\BaseController {
         return view('Modules\Blog\Views\create', $this->defData);
     }
     
-    public function update() {
+    public function update(int $id) {
         if ($this->request->is('post')) {
             $vdata = [
                 ''=>['label'=>'', 'rules'=>''],
@@ -546,6 +546,15 @@ class Blog extends \Modules\Backend\Controllers\BaseController {
         }
         return view('Modules\Blog\Views\update', $this->defData);
     }
+
+    public function delete(int $id)
+    {
+        $infos=$this->commonModel->selectOne('your_table',['id'=>$id]);
+        if($this->commonModel->remove('your_table',['id'=>$id]))
+            return $this->redirect()->back()->with('success',$infos->attr.' deleted.');
+        return \$this->redirect()->back()->with('error','Can not deleted.');
+    }
+
 }
 </pre>
 
@@ -575,7 +584,7 @@ class Blog extends \Modules\Backend\Controllers\BaseController {
                 </div>
                 <div class="col-md-6 text-md-end">
                     <p>Made with <i class="fas fa-heart text-danger"></i> for the CodeIgniter community</p>
-                    <p>© 2025 - All rights reserved</p>
+                    <p>© <script>document.write(new Date().getFullYear())</script> - All rights reserved</p>
                 </div>
             </div>
         </div>
