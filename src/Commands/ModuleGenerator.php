@@ -91,7 +91,7 @@ EOD;
         $l_moduleName = lcfirst($moduleName);
         return <<<EOD
 <?php
-\$routes->group('{$moduleName}', ['namespace' => 'Modules\\{$moduleName}\\Controllers'], function(\$routes) {
+\$routes->group('backend/{$moduleName}', ['namespace' => 'Modules\\{$moduleName}\\Controllers'], function(\$routes) {
     \$routes->match(['GET', 'POST'], '/', '{$moduleName}::index',['as' => '{$l_moduleName}', 'role' => 'read']);
     \$routes->match(['GET', 'POST'], 'create', '{$moduleName}::create', ['as' => '{$l_moduleName}Create', 'role' => 'create']);
     \$routes->match(['GET', 'POST'], 'update/(:num)', '{$moduleName}::update/$1', ['as' => '{$l_moduleName}Update', 'role' => 'update']);
@@ -194,7 +194,7 @@ EOD;
 <?= \$this->extend('Modules\\Backend\\Views\\base') ?>
 
 <?= \$this->section('title') ?>
-<?= lang('\$title->pagename) ?>
+<?= lang(\$title->pagename) ?>
 <?= \$this->endSection() ?>
 
 <?= \$this->section('head') ?>
@@ -206,7 +206,7 @@ EOD;
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1><?= lang('\$title->pagename) ?></h1>
+                <h1><?= lang(\$title->pagename) ?></h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -222,7 +222,7 @@ EOD;
     <!-- Default box -->
     <div class="card card-outline card-shl">
         <div class="card-header">
-            <h3 class="card-title font-weight-bold"><?= lang('\$title->pagename) ?></h3>
+            <h3 class="card-title font-weight-bold"><?= lang(\$title->pagename) ?></h3>
 
             <div class="card-tools">
                 <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
