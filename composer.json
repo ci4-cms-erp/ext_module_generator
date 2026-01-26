@@ -29,7 +29,7 @@
         }
     },
     "extra": {
-        "codeigniter": {
+        "codeigniter4": {
             "namespace": "ci4-cms-erp\\ext_module_generator",
             "commands": [
                 "ci4-cms-erp\\ext_module_generator\\Commands\\ModuleGenerator"

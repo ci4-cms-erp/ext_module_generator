@@ -91,11 +91,11 @@ EOD;
         $l_moduleName = lcfirst($moduleName);
         return <<<EOD
 <?php
-\$routes->group('backend/{$moduleName}', ['namespace' => 'Modules\\{$moduleName}\\Controllers'], function(\$routes) {
+\$routes->group('backend/{$l_moduleName}', ['namespace' => 'Modules\\{$moduleName}\\Controllers'], function(\$routes) {
     \$routes->match(['GET', 'POST'], '/', '{$moduleName}::index',['as' => '{$l_moduleName}', 'role' => 'read']);
     \$routes->match(['GET', 'POST'], 'create', '{$moduleName}::create', ['as' => '{$l_moduleName}Create', 'role' => 'create']);
     \$routes->match(['GET', 'POST'], 'update/(:num)', '{$moduleName}::update/$1', ['as' => '{$l_moduleName}Update', 'role' => 'update']);
-    \$routes->get('delete', '{$moduleName}::delete(:num)',['as' => '{$l_moduleName}Delete/$1', 'role' => 'delete']);
+    \$routes->get('delete/(:num)', '{$moduleName}::delete/$1',['as' => '{$l_moduleName}Delete', 'role' => 'delete']);
 });
 EOD;
     }
@@ -117,7 +117,7 @@ class {$moduleName} extends \Modules\Backend\Controllers\BaseController {
 
             if (!empty(\$like)) \$l = ['your_filed/s' => \$like];
             \$results = \$this->commonModel->lists('your_table', '*', \$postData, 'id ASC', (\$data['length'] == '-1') ? 0 : (int)\$data['length'], (\$data['length'] == '-1') ? 0 : (int)\$data['start'], \$l);
-            \$totalRecords = count(\$this->commonModel->lists('your_table', '*', \$postData, 'id ASC', 0, 0, \$l));
+            \$totalRecords = \$this->commonModel->count('db_backups', \$postData, \$l);
             \$totalDisplayRecords = \$totalRecords;
             foreach (\$results as \$result) {
                 \$result->actions = '<a href="' . route_to('{$l_moduleName}Update', \$result->id) . '" class="btn btn-default btn-sm">
@@ -231,7 +231,7 @@ EOD;
             </div>
         </div>
         <div class="card-body">
-            <?= view('Modules\\Backend\\Views\\sweetalert_message_block') ?>
+
         </div>
         <!-- /.card-body -->
     </div>
