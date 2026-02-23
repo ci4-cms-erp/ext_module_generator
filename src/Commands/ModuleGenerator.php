@@ -53,7 +53,7 @@ class ModuleGenerator extends BaseCommand
         $this->createFile($modulePath . '/Language/tr/' . $moduleName . '.php', $this->getLanguageTemplate($moduleName, 'tr'));
 
         $this->createFile($modulePath . '/Views/create.php', $this->getViewTemplate('<a href="' . route_to(lcfirst($moduleName)) . '" class="btn btn-outline-info">' . lang('Backend.backToList') . '</a>'));
-        $this->createFile($modulePath . '/Views/list.php', $this->getViewTemplateList('<a href="' . route_to(lcfirst($moduleName) . 'Create') . '" class="btn btn-outline-success">' . lang('Backend.add') . '</a>'), $moduleName);
+        $this->createFile($modulePath . '/Views/list.php', $this->getViewTemplateList('<a href="' . route_to(lcfirst($moduleName) . 'Create') . '" class="btn btn-outline-success">' . lang('Backend.add') . '</a>', $moduleName));
         $this->createFile($modulePath . '/Views/update.php', $this->getViewTemplate('<a href="' . route_to(lcfirst($moduleName)) . '" class="btn btn-outline-info">' . lang('Backend.backToList') . '</a>'));
     }
 
@@ -77,7 +77,7 @@ class {$moduleName}Config {
     ];
 
     public \$filters=[
-        'backendAfterLoginFilter' => ['before' => [
+        'backendGuard' => ['before' => [
             'backend/{$l_moduleName}','backend/{$l_moduleName}/*'
             ]
         ]
