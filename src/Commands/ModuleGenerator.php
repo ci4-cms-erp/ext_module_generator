@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace ext_module_generator\Commands;
 
@@ -9,7 +10,7 @@ class ModuleGenerator extends BaseCommand
 {
     protected $group = 'Ci4MS';
     protected $name = 'make:module';
-    protected $description = 'Creates a custom module structure for ci4ms.';
+    protected $description = 'Creates a custom module structure for ci4ms (v0.31.2.0 compatible).';
 
     public function run(array $params)
     {
@@ -24,18 +25,13 @@ class ModuleGenerator extends BaseCommand
 
     protected function createModuleStructure($modulePath, $moduleName)
     {
-        // Create directories
         $folders = [
             $modulePath . '/Config',
             $modulePath . '/Controllers',
             $modulePath . '/Database/Migrations',
-            $modulePath . '/Database/Seeds',
-            $modulePath . '/Helpers',
             $modulePath . '/Language/en',
             $modulePath . '/Language/tr',
             $modulePath . '/Libraries',
-            $modulePath . '/Models',
-            $modulePath . '/Validation',
             $modulePath . '/Views',
         ];
 
@@ -45,16 +41,15 @@ class ModuleGenerator extends BaseCommand
             }
         }
 
-        // Create files
         $this->createFile($modulePath . '/Config/' . $moduleName . 'Config.php', $this->getConfigTemplate($moduleName));
         $this->createFile($modulePath . '/Config/Routes.php', $this->getRoutesTemplate($moduleName));
         $this->createFile($modulePath . '/Controllers/' . $moduleName . '.php', $this->getControllerTemplate($moduleName));
-        $this->createFile($modulePath . '/Language/en/' . $moduleName . '.php', $this->getLanguageTemplate($moduleName, 'en'));
-        $this->createFile($modulePath . '/Language/tr/' . $moduleName . '.php', $this->getLanguageTemplate($moduleName, 'tr'));
+        $this->createFile($modulePath . '/Language/en/' . $moduleName . '.php', $this->getLanguageTemplate($moduleName));
+        $this->createFile($modulePath . '/Language/tr/' . $moduleName . '.php', $this->getLanguageTemplate($moduleName));
 
-        $this->createFile($modulePath . '/Views/create.php', $this->getViewTemplate('<a href="' . route_to(lcfirst($moduleName)) . '" class="btn btn-outline-info">' . lang('Backend.backToList') . '</a>'));
-        $this->createFile($modulePath . '/Views/list.php', $this->getViewTemplateList('<a href="' . route_to(lcfirst($moduleName) . 'Create') . '" class="btn btn-outline-success">' . lang('Backend.add') . '</a>', $moduleName));
-        $this->createFile($modulePath . '/Views/update.php', $this->getViewTemplate('<a href="' . route_to(lcfirst($moduleName)) . '" class="btn btn-outline-info">' . lang('Backend.backToList') . '</a>'));
+        $this->createFile($modulePath . '/Views/create.php', $this->getViewTemplate($moduleName));
+        $this->createFile($modulePath . '/Views/list.php', $this->getViewTemplateList($moduleName));
+        $this->createFile($modulePath . '/Views/update.php', $this->getViewTemplate($moduleName));
     }
 
     protected function createFile($path, $content)
@@ -69,18 +64,32 @@ class ModuleGenerator extends BaseCommand
         $l_moduleName = lcfirst($moduleName);
         return <<<EOD
 <?php
+declare(strict_types=1);
 namespace Modules\\{$moduleName}\\Config;
 
 class {$moduleName}Config {
     public \$csrfExcept = [
-        'backend/{$l_moduleName}','backend/{$l_moduleName}/*'
+        'backend/{$l_moduleName}', 'backend/{$l_moduleName}/*'
     ];
 
-    public \$filters=[
+    public \$filters = [
         'backendGuard' => ['before' => [
-            'backend/{$l_moduleName}','backend/{$l_moduleName}/*'
-            ]
-        ]
+            'backend/{$l_moduleName}', 'backend/{$l_moduleName}/*'
+        ]]
+    ];
+
+    public \$moduleInfo = [
+        'icon' => 'fas fa-cube',
+    ];
+
+    public \$menus = [
+        '{$moduleName}.{$l_moduleName}' => [
+            'icon'         => 'fas fa-list',
+            'inNavigation' => true,
+            'hasChild'     => false,
+            'pageSort'     => 0,
+            'parent_pk'    => null
+        ],
     ];
 }
 EOD;
@@ -92,280 +101,217 @@ EOD;
         return <<<EOD
 <?php
 \$routes->group('backend/{$l_moduleName}', ['namespace' => 'Modules\\{$moduleName}\\Controllers'], function(\$routes) {
-    \$routes->match(['GET', 'POST'], '/', '{$moduleName}::index',['as' => '{$l_moduleName}', 'role' => 'read']);
+    \$routes->match(['GET', 'POST'], '/', '{$moduleName}::index', ['as' => '{$l_moduleName}', 'role' => 'read']);
     \$routes->match(['GET', 'POST'], 'create', '{$moduleName}::create', ['as' => '{$l_moduleName}Create', 'role' => 'create']);
     \$routes->match(['GET', 'POST'], 'update/(:num)', '{$moduleName}::update/$1', ['as' => '{$l_moduleName}Update', 'role' => 'update']);
-    \$routes->get('delete/(:num)', '{$moduleName}::delete/$1',['as' => '{$l_moduleName}Delete', 'role' => 'delete']);
+    \$routes->post('delete/(:num)', '{$moduleName}::delete/$1', ['as' => '{$l_moduleName}Delete', 'role' => 'delete']);
 });
 EOD;
     }
 
     protected function getControllerTemplate($moduleName)
     {
-        $l_moduleName = \lcfirst($moduleName);
+        $l_moduleName = lcfirst($moduleName);
+        $tableName = $l_moduleName; // Varsayılan tablo ismi
         return <<<EOD
 <?php
+declare(strict_types=1);
 namespace Modules\\{$moduleName}\\Controllers;
 
 class {$moduleName} extends \Modules\Backend\Controllers\BaseController {
-    public function index() {
-    if (\$this->request->is('post') && \$this->request->isAJAX()) {
-            \$data = clearFilter(\$this->request->getPost());
-            \$like = \$data['search']['value'];
-            \$l = [];
-            \$postData = [];
 
-            if (!empty(\$like)) \$l = ['your_filed/s' => \$like];
-            \$results = \$this->commonModel->lists('your_table', '*', \$postData, 'id ASC', (\$data['length'] == '-1') ? 0 : (int)\$data['length'], (\$data['length'] == '-1') ? 0 : (int)\$data['start'], \$l);
-            \$totalRecords = \$this->commonModel->count('db_backups', \$postData, \$l);
-            \$totalDisplayRecords = \$totalRecords;
-            foreach (\$results as \$result) {
-                \$result->actions = '<a href="' . route_to('{$l_moduleName}Update', \$result->id) . '" class="btn btn-default btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                </svg>
-            </a> <a href="' . route_to('{$l_moduleName}Delete', \$result->id) . '" class="btn btn-default btn-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash2-fill" viewBox="0 0 16 16">
-                      <path d="M2.037 3.225A.7.7 0 0 1 2 3c0-1.105 2.686-2 6-2s6 .895 6 2a.7.7 0 0 1-.037.225l-1.684 10.104A2 2 0 0 1 10.305 15H5.694a2 2 0 0 1-1.973-1.671zm9.89-.69C10.966 2.214 9.578 2 8 2c-1.58 0-2.968.215-3.926.534-.477.16-.795.327-.975.466.18.14.498.307.975.466C5.032 3.786 6.42 4 8 4s2.967-.215 3.926-.534c.477-.16.795-.327.975-.466-.18-.14-.498-.307-.975-.466z"/>
-                </svg>
-            </a>';
+    public function index() {
+        if (\$this->request->isAJAX() && \$this->request->is('post')) {
+            \$parsed = \$this->commonBackendLibrary->getDatatablesPagination(\$this->request->getPost());
+
+            \$like = [];
+            if (!empty(\$parsed['searchString'])) {
+                \$like = ['title' => \$parsed['searchString']]; // Değiştirin
             }
 
-            \$data = [
-                'draw' => intval(\$data['draw']),
+            \$totalRecords = \$this->commonModel->count('{$tableName}');
+            \$filteredCount = !empty(\$like)
+                ? count(\$this->commonModel->lists('{$tableName}', 'id', [], 'id ASC', 0, 0, \$like))
+                : \$totalRecords;
+
+            \$results = \$this->commonModel->lists('{$tableName}', '*', [], 'id DESC',
+                \$parsed['length'], \$parsed['start'], \$like);
+
+            foreach (\$results as \$result) {
+                \$result->actions = '<a href="' . route_to('{$l_moduleName}Update', \$result->id) . '" class="btn btn-default btn-sm">
+                    <i class="fas fa-edit"></i>
+                </a>
+                <button type="button" class="btn btn-default btn-sm btnDelete" data-id="' . \$result->id . '">
+                    <i class="fas fa-trash"></i>
+                </button>';
+            }
+
+            return \$this->respond([
+                'draw' => \$parsed['draw'],
                 'iTotalRecords' => \$totalRecords,
-                'iTotalDisplayRecords' => \$totalDisplayRecords,
+                'iTotalDisplayRecords' => \$filteredCount,
                 'aaData' => \$results,
-            ];
-            return \$this->respond(\$data, 200);
+            ], 200);
         }
         return view('Modules\\{$moduleName}\\Views\\list', \$this->defData);
     }
 
     public function create() {
         if (\$this->request->is('post')) {
-            \$vdata = [
-                ''=>['label'=>'', 'rules'=>''],
+            \$valData = [
+                'title' => ['label' => lang('Backend.title'), 'rules' => 'required|max_length[255]|regex_match[/^[^<>{}=]+$/u]'],
             ];
-            \$valData = (\$vdata);
-            if (\$this->validate(\$valData) == false) return redirect()->back()->withInput()->with('errors', \$this->validator->getErrors());
+            if (\$this->validate(\$valData) === false) {
+                return redirect()->back()->withInput()->with('errors', \$this->validator->getErrors());
+            }
+
+            // \$this->commonModel->create('{$tableName}', \$data);
         }
-        return view('Modules\\{$moduleName}\\Views\create', \$this->defData);
+        return view('Modules\\{$moduleName}\\Views\\create', \$this->defData);
     }
 
     public function update(int \$id) {
+        \$this->defData['infos'] = \$this->commonModel->selectOne('{$tableName}', ['id' => \$id]);
+        if (empty(\$this->defData['infos'])) return show_404();
+
         if (\$this->request->is('post')) {
-            \$vdata = [
-                ''=>['label'=>'', 'rules'=>''],
-            ];
-            \$valData = (\$vdata);
-            if (\$this->validate(\$valData) == false) return redirect()->back()->withInput()->with('errors', \$this->validator->getErrors());
+            // Validation ve Update mantığı
         }
-        return view('Modules\\{$moduleName}\\Views\update', \$this->defData);
+        return view('Modules\\{$moduleName}\\Views\\update', \$this->defData);
     }
 
-    public function delete(int \$id)
-    {
-        \$infos=\$this->commonModel->selectOne('your_table',['id'=>\$id]);
-        if(\$this->commonModel->remove('your_table',['id'=>\$id]))
-            return \$this->redirect()->back()->with('success',\$infos->attr.' deleted.');
-        return \$this->redirect()->back()->with('error','Can not deleted.');
+    public function delete(int \$id) {
+        if (\$this->request->isAJAX()) {
+            if (\$this->commonModel->remove('{$tableName}', ['id' => \$id])) {
+                return \$this->respond(['result' => true], 200);
+            }
+            return \$this->fail('Error');
+        }
+        return \$this->failForbidden();
     }
 }
 EOD;
     }
 
-    protected function getLanguageTemplate($moduleName, $lang)
+    protected function getLanguageTemplate($moduleName)
     {
-        $langName = $lang === 'en' ? 'English' : 'Türkçe';
         return <<<EOD
 <?php
+declare(strict_types=1);
 
 return [
-    'welcome' => 'Welcome to {$moduleName} module ({$langName})',
+    '{$moduleName}' => '{$moduleName}',
+    'welcome' => 'Welcome to {$moduleName} module',
 ];
 EOD;
     }
 
-    protected function getViewTemplate($button)
-    {
-        return <<<EOD
-<?= \$this->extend('Modules\\Backend\\Views\\base') ?>
-
-<?= \$this->section('title') ?>
-<?= lang(\$title->pagename) ?>
-<?= \$this->endSection() ?>
-
-<?= \$this->section('head') ?>
-<?= \$this->endSection() ?>
-
-<?= \$this->section('content') ?>
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1><?= lang(\$title->pagename) ?></h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    {$button}
-                </ol>
-            </div>
-        </div>
-    </div><!-- /.container-fluid -->
-</section>
-
-<!-- Main content -->
-<section class="content">
-    <!-- Default box -->
-    <div class="card card-outline card-shl">
-        <div class="card-header">
-            <h3 class="card-title font-weight-bold"><?= lang(\$title->pagename) ?></h3>
-
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                    <i class="fas fa-minus"></i>
-                </button>
-            </div>
-        </div>
-        <div class="card-body">
-
-        </div>
-        <!-- /.card-body -->
-    </div>
-    <!-- /.card -->
-</section>
-<!-- /.content -->
-<?= \$this->endSection() ?>
-
-<?= \$this->section('javascript') ?>
-<?= \$this->endSection() ?>
-EOD;
-    }
-
-    protected function getViewTemplateList($button, $moduleName)
+    protected function getViewTemplate($moduleName)
     {
         $l_moduleName = lcfirst($moduleName);
         return <<<EOD
-<?= \$this->extend('Modules\\Backend\\Views\\base') ?>
+<?php echo \$this->extend(\$backConfig->viewLayout);
+echo \$this->section('title');
+echo lang(\$title->pagename);
+echo \$this->endSection();
+echo \$this->section('head');
+echo \$this->endSection();
+echo \$this->section('content'); ?>
 
-<?= \$this->section('title') ?>
-<?= lang(\$title->pagename) ?>
-<?= \$this->endSection() ?>
-
-<?= \$this->section('head') ?>
-<?= link_tag('be-assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css') ?>
-<?= link_tag('be-assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css') ?>
-<?= link_tag('be-assets/plugins/datatables-buttons/css/buttons.bootstrap4.min.css') ?>
-<?= \$this->endSection() ?>
-
-<?= \$this->section('content') ?>
-<!-- Content Header (Page header) -->
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1><?= lang(\$title->pagename) ?></h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    {$button}
-                </ol>
+<section class="content p-3">
+    <div class="card card-outline shadow-sm">
+        <div class="card-header d-flex align-items-center">
+            <h3 class="card-title font-weight-bold mb-0"><?php echo lang(\$title->pagename) ?></h3>
+            <div class="ml-auto">
+                <a href="<?php echo route_to('{$l_moduleName}') ?>" class="btn btn-sm btn-outline-info">
+                    <?php echo lang('Backend.backToList') ?>
+                </a>
             </div>
         </div>
-    </div><!-- /.container-fluid -->
+        <form action="<?php echo current_url() ?>" method="post">
+            <?php echo csrf_field() ?>
+            <div class="card-body">
+                <!-- Form Fields -->
+            </div>
+            <div class="card-footer text-right">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save mr-1"></i> <?php echo lang('Backend.save') ?>
+                </button>
+            </div>
+        </form>
+    </div>
 </section>
+<?php echo \$this->endSection(); ?>
+EOD;
+    }
 
-<!-- Main content -->
-<section class="content">
-    <!-- Default box -->
-    <div class="card card-outline card-shl">
-        <div class="card-header">
-            <h3 class="card-title font-weight-bold"><?= lang(\$title->pagename) ?></h3>
+    protected function getViewTemplateList($moduleName)
+    {
+        $l_moduleName = lcfirst($moduleName);
+        return <<<EOD
+<?php echo \$this->extend(\$backConfig->viewLayout);
+echo \$this->section('title');
+echo lang(\$title->pagename);
+echo \$this->endSection();
+echo \$this->section('head');
+echo link_tag('be-assets/plugins/datatables-bs4/css/dataTables.bootstrap4.min.css');
+echo link_tag('be-assets/plugins/datatables-responsive/css/responsive.bootstrap4.min.css');
+echo \$this->endSection();
+echo \$this->section('content'); ?>
 
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                    <i class="fas fa-minus"></i>
+<section class="content p-3">
+    <div class="card premium-card">
+        <div class="card-header d-flex align-items-center">
+            <h3 class="card-title font-weight-bold mb-0"><?php echo lang(\$title->pagename) ?></h3>
+            <div class="ml-auto">
+                <a href="<?php echo route_to('{$l_moduleName}Create') ?>" class="btn btn-sm btn-outline-success">
+                    <?php echo lang('Backend.add') ?>
+                </a>
+                <button class="btn btn-sm btn-outline-secondary ml-1" id="btnRefresh" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
                 </button>
             </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table id="example1" class="table table-bordered table-striped">
+                <table id="moduleTable" class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th><?=lang('Backend.title')?></th>
-                            <th><?=lang('Backend.transactions')?></th>
+                            <th><?php echo lang('Backend.title') ?></th>
+                            <th><?php echo lang('Backend.transactions') ?></th>
                         </tr>
                     </thead>
-                    <tbody>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
-        <!-- /.card-body -->
     </div>
-    <!-- /.card -->
 </section>
-<!-- /.content -->
-<?= \$this->endSection() ?>
 
-<?= \$this->section('javascript') ?>
-<?= script_tag('be-assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js') ?>
-<?= script_tag('be-assets/plugins/datatables-responsive/js/dataTables.responsive.min.js') ?>
-<?= script_tag('be-assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js') ?>
-<?= script_tag('be-assets/plugins/datatables-buttons/js/dataTables.buttons.min.js') ?>
-<?= script_tag('be-assets/plugins/datatables-buttons/js/buttons.bootstrap4.min.js') ?>
-<?= script_tag('be-assets/plugins/jszip/jszip.min.js') ?>
-<?= script_tag('be-assets/plugins/pdfmake/pdfmake.min.js') ?>
-<?= script_tag('be-assets/plugins/pdfmake/vfs_fonts.js') ?>
-<?= script_tag('be-assets/plugins/datatables-buttons/js/buttons.html5.min.js') ?>
-<?= script_tag('be-assets/plugins/datatables-buttons/js/buttons.print.min.js') ?>
-<?= script_tag('be-assets/plugins/datatables-buttons/js/buttons.colVis.min.js') ?>
-<script>
-    let isApprove = true;
-    var table = $("#example1").DataTable({
-        responsive: true,
-        lengthChange: false,
-        autoWidth: false,
-        buttons: ["pageLength", {
-            text: "Refresh",
-            className: "btn btn-teal",
-            action: function(e, dt, node, config) {
-                dt.ajax.reload();
-            }
-        }],
-        processing: true,
-        pageLength: 10,
-        serverSide: true,
-        ordering: false,
-        lengthMenu: [10, 25, 50, {
-            label: 'All',
-            value: -1
-        }],
-        ajax: {
-            url: '<?= route_to('{$l_moduleName}') ?>',
-            type: 'POST',
-            data: {
-                isApproved: isApprove
-            }
-        },
-        columns: [{
-                data: 'title'
+<?php echo \$this->endSection();
+echo \$this->section('javascript');
+echo script_tag('be-assets/plugins/datatables/jquery.dataTables.min.js');
+echo script_tag('be-assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js');
+echo script_tag('be-assets/plugins/datatables-responsive/js/dataTables.responsive.min.js'); ?>
+<script {csp-script-nonce}>
+    $(function() {
+        var table = $("#moduleTable").DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: '<?php echo route_to('{$l_moduleName}') ?>',
+                type: 'POST'
             },
-            {
-                data: 'actions'
-            }
-        ],
-        initComplete: function() {
-            table.buttons().container()
-                .appendTo($('.col-md-6:eq(0)', table.table().container()));
-        }
+            columns: [
+                { data: 'title' },
+                { data: 'actions', className: 'text-center' }
+            ],
+            language: ci4msDtLanguage('<?php echo lang('Backend.search') ?>')
+        });
+        $('#btnRefresh').click(() => table.ajax.reload());
     });
 </script>
-<?= \$this->endSection() ?>
+<?php echo \$this->endSection() ?>
 EOD;
     }
 }
